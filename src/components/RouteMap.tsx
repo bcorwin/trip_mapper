@@ -41,7 +41,18 @@ export default function RouteMap() {
   }, []);
 
   return (
-    <MapContainer center={position} zoom={5} style={{ height: "100vh", width: "100%" }}>
+    <MapContainer
+      center={position}
+      zoom={5}
+      style={{ height: "100vh", width: "100%" }}
+      dragging={false}
+      touchZoom={false}
+      scrollWheelZoom={false}
+      doubleClickZoom={false}
+      boxZoom={false}
+      keyboard={false}
+      zoomControl={false}
+    >
       <TileLayer
         attribution='&copy; OpenStreetMap contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
