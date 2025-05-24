@@ -11,20 +11,29 @@ type HotlineValues = {
 
 const position: [number, number] = [38, -98]; // Center of USA
 const gpx_data = "/route.gpx";
+const date_range = [
+  new Date('2023-07-10'),
+  new Date('2024-10-14')
+];
+
+function clamp(val:number, min:number, max:number) {
+  return Math.min(Math.max(val, min), max);
+}
 
 export default function RouteMap() {
   const [trackPoints, setTrackPoints] = useState<HotlineValues[]>([]);
-  const [endDate, setEndDate] = useState<Date>(new Date('2023-07-10'));
+  const [endDate, setEndDate] = useState<Date>(date_range[0]);
 
   function handleWheel(event: WheelEvent<HTMLDivElement>) {
     event.preventDefault(); // Prevents default scrolling behavior
     // TODO: Go through travel dates instead?
-    // TODO: Set min / max date (make a var and use it when setting value below too)
-    if(event.deltaY < 0) {
-      setEndDate(new Date(endDate.getTime() - (1000 * 60 * 60 * 24)));
-    } else {
-      setEndDate(new Date(endDate.getTime() + (1000 * 60 * 60 * 24)));
-    }
+    const dayDelta = 7*4;
+    let newDate = clamp(
+      endDate.getTime() + Math.sign(event.deltaY)*dayDelta*(1000 * 60 * 60 * 24),
+      Number(date_range[0]),
+      Number(date_range[1])
+    );
+    setEndDate(new Date(newDate))
     console.log(endDate)
   };
 
