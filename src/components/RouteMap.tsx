@@ -1,5 +1,5 @@
 import React, { useEffect, useState, WheelEvent } from "react";
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, Circle, Tooltip } from 'react-leaflet';
 import { Hotline, Color } from 'react-leaflet-hotline';
 import gpxParser from "gpxparser";
 
@@ -7,6 +7,13 @@ type HotlineValues = {
   lat: number,
   lng: number,
   val: number,
+};
+
+type Waypoint = {
+  lat: number;
+  lng: number;
+  name?: string;
+  desc?: string;
 };
 
 const position: [number, number] = [38, -98]; // Center of USA
@@ -44,6 +51,7 @@ function clamp(val:number, min:number, max:number) {
 
 export default function RouteMap() {
   const [trackPoints, setTrackPoints] = useState<HotlineValues[]>([]);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [endDate, setEndDate] = useState<Date>(date_range[0]);
 
   function handleWheel(event: WheelEvent<HTMLDivElement>) {
@@ -79,6 +87,20 @@ export default function RouteMap() {
         });
       });
       setTrackPoints(points);
+
+      // Extract waypoints
+      const wpts: Waypoint[] = [];
+      gpx.waypoints.forEach(wpt => {
+        if(wpt.time <= endDate) {
+          wpts.push({
+            lat: wpt.lat,
+            lng: wpt.lon,
+            name: wpt.name,
+            desc: wpt.desc,
+          });
+        }
+      });
+      setWaypoints(wpts);
     };
 
     fetchAndParseGpx();
@@ -114,6 +136,11 @@ export default function RouteMap() {
             outlineColor: 'black',
           }}
         />
+        {waypoints.map((wpt, i) => (
+          <Circle key={i} center={[wpt.lat, wpt.lng]} radius={20000} fill={true} color={'black'} fillColor={'black'} fillOpacity={1}>
+            <Tooltip><strong>{wpt.name || "Waypoint"}</strong>{wpt.desc && <div>{wpt.desc}</div>}</Tooltip>
+          </Circle>
+        ))}
       </MapContainer>
     </div>
   );
